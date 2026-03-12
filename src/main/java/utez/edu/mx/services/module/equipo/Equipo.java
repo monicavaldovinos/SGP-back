@@ -1,0 +1,60 @@
+package utez.edu.mx.services.module.equipo;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "EQUIPO")
+public class Equipo {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "equipo_seq")
+    @SequenceGenerator(name = "equipo_seq", sequenceName = "SEQ_EQUIPO", allocationSize = 1)
+    @Column(name = "id_equipo", nullable = false)
+    private Long idEquipo;
+
+    @Column(name = "nombre_equipo", nullable = false, length = 150)
+    private String nombreEquipo;
+
+    @Column(name = "descripcion", length = 255)
+    private String descripcion;
+
+    @Column(name = "logo", length = 500)
+    private String logo;
+
+    @Column(name = "fecha_creacion", nullable = false)
+    private LocalDate fechaCreacion;
+
+    @Column(name = "estatus", nullable = false, length = 20)
+    private String estatus;
+
+    public Equipo() {}
+
+    public Equipo(Long idEquipo, String nombreEquipo, String descripcion, String logo,
+                  LocalDate fechaCreacion, String estatus) {
+        this.idEquipo = idEquipo;
+        this.nombreEquipo = nombreEquipo;
+        this.descripcion = descripcion;
+        this.logo = logo;
+        this.fechaCreacion = fechaCreacion;
+        this.estatus = estatus;
+    }
+
+    public Long getIdEquipo() { return idEquipo; }
+    public void setIdEquipo(Long idEquipo) { this.idEquipo = idEquipo; }
+
+    public String getNombreEquipo() { return nombreEquipo; }
+    public void setNombreEquipo(String nombreEquipo) { this.nombreEquipo = nombreEquipo; }
+
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+    public String getLogo() { return logo; }
+    public void setLogo(String logo) { this.logo = logo; }
+
+    public LocalDate getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDate fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+    public String getEstatus() { return estatus; }
+    public void setEstatus(String estatus) { this.estatus = estatus; }
+}
