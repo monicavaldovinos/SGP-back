@@ -2,98 +2,89 @@ package utez.edu.mx.services.module.usuario;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    // GET ALL
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        AppiResponse response = new AppiResponse(
-                "Operación exitosa",
-                usuarioRepository.findAll(),
-                HttpStatus.OK
-        );
-        return new ResponseEntity<>(response, response.getStatus());
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", usuarioRepository.findAll(), HttpStatus.OK));
     }
 
-    // GET BY ID
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findById(Long id) {
-        Usuario found = usuarioRepository.findById(id).orElse(null);
-        AppiResponse response;
-        if (found != null) {
-            response = new AppiResponse("Operación exitosa", found, HttpStatus.OK);
-        } else {
-            response = new AppiResponse("Usuario no encontrado", true, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(response, response.getStatus());
+        Optional<Usuario> u = usuarioRepository.findById(id);
+        if (u.isEmpty())
+            return ResponseEntity.badRequest().body(new AppiResponse("Usuario no encontrado", HttpStatus.BAD_REQUEST));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", u.get(), HttpStatus.OK));
     }
 
-    // POST
     @Transactional
     public ResponseEntity<AppiResponse> save(Usuario usuario) {
-        // Verificar correo duplicado
-        if (usuarioRepository.existsByCorreo(usuario.getCorreo())) {
-            AppiResponse response = new AppiResponse("El correo ya está registrado", true, HttpStatus.BAD_REQUEST);
-            return new ResponseEntity<>(response, response.getStatus());
-        }
-        // Verificar username duplicado
-        if (usuarioRepository.existsByUsername(usuario.getUsername())) {
-            AppiResponse response = new AppiResponse("El username ya está en uso", true, HttpStatus.BAD_REQUEST);
-            return new ResponseEntity<>(response, response.getStatus());
-        }
-        // Asignar fecha de registro automáticamente
+        if (usuarioRepository.existsByUsername(usuario.getUsername()))
+            return ResponseEntity.badRequest().body(new AppiResponse("El username ya está en uso", HttpStatus.BAD_REQUEST));
+        if (usuarioRepository.existsByCorreo(usuario.getCorreo()))
+            return ResponseEntity.badRequest().body(new AppiResponse("El correo ya está en uso", HttpStatus.BAD_REQUEST));
+
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuario.setFechaRegistro(LocalDate.now());
-        // Asignar estatus activo por defecto
         usuario.setEstatus("ACTIVO");
-
-        AppiResponse response = new AppiResponse(
-                "Usuario registrado correctamente",
-                usuarioRepository.save(usuario),
-                HttpStatus.CREATED
-        );
-        return new ResponseEntity<>(response, response.getStatus());
+        Usuario saved = usuarioRepository.save(usuario);
+        return ResponseEntity.ok(new AppiResponse("Usuario registrado exitosamente", saved, HttpStatus.OK));
     }
 
-    // PUT
     @Transactional
-    public ResponseEntity<AppiResponse> update(Usuario usuario) {
-        if (!usuarioRepository.existsById(usuario.getIdUsuario())) {
-            AppiResponse response = new AppiResponse("Usuario no encontrado", true, HttpStatus.NOT_FOUND);
-            return new ResponseEntity<>(response, response.getStatus());
-        }
-        AppiResponse response = new AppiResponse(
-                "Usuario actualizado correctamente",
-                usuarioRepository.save(usuario),
-                HttpStatus.OK
-        );
-        return new ResponseEntity<>(response, response.getStatus());
+    public ResponseEntity<AppiResponse> update(Long id, Usuario usuario) {
+        Optional<Usuario> existing = usuarioRepository.findById(id);
+        if (existing.isEmpty())
+            return ResponseEntity.badRequest().body(new AppiResponse("Usuario no encontrado", HttpStatus.BAD_REQUEST));
+
+        Usuario u = existing.get();
+        u.setNombre(usuario.getNombre());
+        u.setApellidoPaterno(usuario.getApellidoPaterno());
+        u.setApellidoMaterno(usuario.getApellidoMaterno());
+        u.setCorreo(usuario.getCorreo());
+        u.setSalario(usuario.getSalario());
+        u.setRol(usuario.getRol());
+        return ResponseEntity.ok(new AppiResponse("Usuario actualizado exitosamente", usuarioRepository.save(u), HttpStatus.OK));
     }
 
-    // DELETE (cambio de estatus, no borrado físico)
+    @Transactional
+    public ResponseEntity<AppiResponse> cambiarPassword(Long id, String newPassword) {
+        Optional<Usuario> existing = usuarioRepository.findById(id);
+        if (existing.isEmpty())
+            return ResponseEntity.badRequest().body(new AppiResponse("Usuario no encontrado", HttpStatus.BAD_REQUEST));
+
+        Usuario u = existing.get();
+        u.setPassword(passwordEncoder.encode(newPassword));
+        usuarioRepository.save(u);
+        return ResponseEntity.ok(new AppiResponse("Contraseña actualizada exitosamente", HttpStatus.OK));
+    }
+
     @Transactional
     public ResponseEntity<AppiResponse> delete(Long id) {
-        Usuario found = usuarioRepository.findById(id).orElse(null);
-        if (found == null) {
-            AppiResponse response = new AppiResponse("Usuario no encontrado", true, HttpStatus.NOT_FOUND);
-            return new ResponseEntity<>(response, response.getStatus());
-        }
-        // Borrado lógico: cambiar estatus
-        found.setEstatus("INACTIVO");
-        usuarioRepository.save(found);
-        AppiResponse response = new AppiResponse("Usuario desactivado correctamente", HttpStatus.OK);
-        return new ResponseEntity<>(response, response.getStatus());
+        Optional<Usuario> existing = usuarioRepository.findById(id);
+        if (existing.isEmpty())
+            return ResponseEntity.badRequest().body(new AppiResponse("Usuario no encontrado", HttpStatus.BAD_REQUEST));
+
+        Usuario u = existing.get();
+        u.setEstatus("INACTIVO");
+        usuarioRepository.save(u);
+        return ResponseEntity.ok(new AppiResponse("Usuario desactivado exitosamente", HttpStatus.OK));
     }
 }

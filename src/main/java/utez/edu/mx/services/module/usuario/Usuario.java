@@ -1,14 +1,19 @@
 package utez.edu.mx.services.module.usuario;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import utez.edu.mx.services.module.rol.Rol;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "USUARIO")
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuario_seq")
@@ -34,7 +39,6 @@ public class Usuario {
     @Column(name = "password", nullable = false)
     private String password;
 
-    // ✅ Campo nuevo agregado según BD final
     @Column(name = "salario", precision = 10, scale = 2)
     private BigDecimal salario;
 
@@ -66,6 +70,31 @@ public class Usuario {
         this.rol = rol;
     }
 
+    // ── UserDetails ──────────────────────────────────────────────────────────
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
+    }
+
+    @Override
+    public String getPassword() { return password; }
+
+    @Override
+    public String getUsername() { return username; }
+
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return "ACTIVO".equals(estatus); }
+
+    // ── Getters & Setters ─────────────────────────────────────────────────────
     public Long getIdUsuario() { return idUsuario; }
     public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
 
@@ -81,10 +110,8 @@ public class Usuario {
     public String getCorreo() { return correo; }
     public void setCorreo(String correo) { this.correo = correo; }
 
-    public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
-    public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
     public BigDecimal getSalario() { return salario; }
