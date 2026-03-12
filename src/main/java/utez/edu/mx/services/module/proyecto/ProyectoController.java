@@ -1,5 +1,6 @@
 package utez.edu.mx.services.module.proyecto;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
@@ -36,12 +37,12 @@ public class ProyectoController {
     }
 
     @PostMapping
-    public ResponseEntity<AppiResponse> save(@RequestBody Proyecto proyecto) {
+    public ResponseEntity<AppiResponse> save(@Valid @RequestBody Proyecto proyecto) {
         return proyectoService.save(proyecto);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppiResponse> update(@PathVariable Long id, @RequestBody Proyecto proyecto) {
+    public ResponseEntity<AppiResponse> update(@Valid @PathVariable Long id, @RequestBody Proyecto proyecto) {
         return proyectoService.update(id, proyecto);
     }
 

@@ -7,4 +7,6 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long> {
     List<Proyecto> findByEstado(String estado);
     List<Proyecto> findByEquipoIdEquipo(Long idEquipo);
     List<Proyecto> findByLiderIdUsuario(Long idUsuario);
+    boolean existsByNombre(String nombre);
+    boolean existsByNombreAndIdProyectoNot(String nombre, Long idProyecto);
 }

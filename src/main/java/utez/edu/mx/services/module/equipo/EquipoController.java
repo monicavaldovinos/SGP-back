@@ -1,5 +1,6 @@
 package utez.edu.mx.services.module.equipo;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
@@ -26,12 +27,12 @@ public class EquipoController {
     }
 
     @PostMapping
-    public ResponseEntity<AppiResponse> save(@RequestBody Equipo equipo) {
+    public ResponseEntity<AppiResponse> save(@Valid @RequestBody Equipo equipo) {
         return equipoService.save(equipo);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppiResponse> update(@PathVariable Long id, @RequestBody Equipo equipo) {
+    public ResponseEntity<AppiResponse> update(@Valid @PathVariable Long id, @RequestBody Equipo equipo) {
         return equipoService.update(id, equipo);
     }
 

@@ -1,5 +1,6 @@
 package utez.edu.mx.services.module.tarea;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
@@ -42,12 +43,12 @@ public class TareaController {
     }
 
     @PostMapping
-    public ResponseEntity<AppiResponse> save(@RequestBody Tarea tarea) {
+    public ResponseEntity<AppiResponse> save(@Valid @RequestBody Tarea tarea) {
         return tareaService.save(tarea);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppiResponse> update(@PathVariable Long id, @RequestBody Tarea tarea) {
+    public ResponseEntity<AppiResponse> update(@Valid @PathVariable Long id, @RequestBody Tarea tarea) {
         return tareaService.update(id, tarea);
     }
 

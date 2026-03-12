@@ -1,6 +1,7 @@
 package utez.edu.mx.services.module.pago;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import utez.edu.mx.services.module.categoriagasto.CategoriaGasto;
 import utez.edu.mx.services.module.proyecto.Proyecto;
 import utez.edu.mx.services.module.usuario.Usuario;
@@ -18,21 +19,29 @@ public class Pago {
     @Column(name = "id_pago", nullable = false)
     private Long idPago;
 
+    @NotBlank(message = "El concepto es obligatorio")
+    @Size(max = 150, message = "El concepto no puede tener más de 150 caracteres")
     @Column(name = "concepto", nullable = false, length = 150)
     private String concepto;
 
+    @Size(max = 255, message = "La descripción no puede tener más de 255 caracteres")
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 
+    @NotNull(message = "El monto es obligatorio")
+    @DecimalMin(value = "0.01", message = "El monto debe ser mayor a 0")
     @Column(name = "monto", nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
 
+    @DecimalMin(value = "0.0", message = "Las horas no pueden ser negativas")
     @Column(name = "horas", precision = 5, scale = 2)
     private BigDecimal horas;
 
+    @DecimalMin(value = "0.0", message = "La tarifa no puede ser negativa")
     @Column(name = "tarifa", precision = 10, scale = 2)
     private BigDecimal tarifa;
 
+    @NotBlank(message = "La forma de pago es obligatoria")
     @Column(name = "forma_pago", nullable = false, length = 50)
     private String formaPago;
 
@@ -43,20 +52,24 @@ public class Pago {
     private LocalDate fechaPago;
 
     @Column(name = "estatus", nullable = false, length = 20)
-    private String estatus; // PENDIENTE, RECIBIDO
+    private String estatus;
 
+    @NotNull(message = "El proyecto es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_proyecto", nullable = false)
     private Proyecto proyecto;
 
+    @NotNull(message = "La categoría es obligatoria")
     @ManyToOne
     @JoinColumn(name = "id_categoria", nullable = false)
     private CategoriaGasto categoria;
 
+    @NotNull(message = "El usuario es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
+    @NotNull(message = "El registrado por es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_registrado_por", nullable = false)
     private Usuario registradoPor;

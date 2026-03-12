@@ -1,6 +1,8 @@
 package utez.edu.mx.services.module.equipo;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -13,9 +15,12 @@ public class Equipo {
     @Column(name = "id_equipo", nullable = false)
     private Long idEquipo;
 
+    @NotBlank(message = "El nombre del equipo es obligatorio")
+    @Size(max = 150, message = "El nombre no puede tener más de 150 caracteres")
     @Column(name = "nombre_equipo", nullable = false, length = 150)
     private String nombreEquipo;
 
+    @Size(max = 255, message = "La descripción no puede tener más de 255 caracteres")
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 

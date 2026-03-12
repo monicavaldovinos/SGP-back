@@ -1,6 +1,7 @@
 package utez.edu.mx.services.module.tarea;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import utez.edu.mx.services.module.proyecto.Proyecto;
 import utez.edu.mx.services.module.usuario.Usuario;
 
@@ -16,6 +17,8 @@ public class Tarea {
     @Column(name = "id_tarea", nullable = false)
     private Long idTarea;
 
+    @NotBlank(message = "El nombre de la tarea es obligatorio")
+    @Size(max = 150, message = "El nombre no puede tener más de 150 caracteres")
     @Column(name = "nombre", nullable = false, length = 150)
     private String nombre;
 
@@ -26,15 +29,19 @@ public class Tarea {
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
+    @Future(message = "La fecha de fin debe ser una fecha futura")
     @Column(name = "fecha_fin")
     private LocalDate fechaFin;
 
+    @NotBlank(message = "La prioridad es obligatoria")
+    @Pattern(regexp = "ALTA|MEDIA|BAJA", message = "La prioridad debe ser ALTA, MEDIA o BAJA")
     @Column(name = "prioridad", nullable = false, length = 10)
-    private String prioridad; // ALTA, MEDIA, BAJA
+    private String prioridad;
 
     @Column(name = "estado", nullable = false, length = 20)
-    private String estado; // PENDIENTE, EN_CURSO, COMPLETADA
+    private String estado;
 
+    @NotNull(message = "El proyecto es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_proyecto", nullable = false)
     private Proyecto proyecto;

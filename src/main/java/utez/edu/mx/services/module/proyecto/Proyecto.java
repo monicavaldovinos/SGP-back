@@ -1,6 +1,7 @@
 package utez.edu.mx.services.module.proyecto;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import utez.edu.mx.services.module.equipo.Equipo;
 import utez.edu.mx.services.module.usuario.Usuario;
 
@@ -17,6 +18,8 @@ public class Proyecto {
     @Column(name = "id_proyecto", nullable = false)
     private Long idProyecto;
 
+    @NotBlank(message = "El nombre del proyecto es obligatorio")
+    @Size(max = 150, message = "El nombre no puede tener más de 150 caracteres")
     @Column(name = "nombre", nullable = false, length = 150)
     private String nombre;
 
@@ -31,22 +34,26 @@ public class Proyecto {
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
+    @Future(message = "La fecha de fin debe ser una fecha futura")
     @Column(name = "fecha_fin")
     private LocalDate fechaFin;
 
     @Column(name = "estado", nullable = false, length = 20)
     private String estado;
 
+    @DecimalMin(value = "0.0", message = "El presupuesto no puede ser negativo")
     @Column(name = "presupuesto_total", precision = 10, scale = 2)
     private BigDecimal presupuestoTotal;
 
     @Column(name = "logo", length = 500)
     private String logo;
 
+    @NotNull(message = "El equipo es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_equipo", nullable = false)
     private Equipo equipo;
 
+    @NotNull(message = "El líder es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_lider", nullable = false)
     private Usuario lider;

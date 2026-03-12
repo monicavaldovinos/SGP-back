@@ -8,4 +8,5 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
     List<Pago> findByUsuarioIdUsuario(Long idUsuario);
     List<Pago> findByEstatus(String estatus);
     List<Pago> findByProyectoIdProyectoAndEstatus(Long idProyecto, String estatus);
+    List<Pago> findByProyectoIdProyectoAndUsuarioIdUsuario(Long idProyecto, Long idUsuario);
 }

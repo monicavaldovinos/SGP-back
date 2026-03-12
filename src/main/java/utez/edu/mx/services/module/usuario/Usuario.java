@@ -1,6 +1,7 @@
 package utez.edu.mx.services.module.usuario;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,6 +9,7 @@ import utez.edu.mx.services.module.rol.Rol;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,24 +23,37 @@ public class Usuario implements UserDetails {
     @Column(name = "id_usuario", nullable = false)
     private Long idUsuario;
 
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 100, message = "El nombre no puede tener más de 100 caracteres")
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
 
+    @NotBlank(message = "El apellido paterno es obligatorio")
+    @Size(max = 100, message = "El apellido paterno no puede tener más de 100 caracteres")
     @Column(name = "apellido_paterno", nullable = false, length = 100)
     private String apellidoPaterno;
 
+    @Size(max = 100, message = "El apellido materno no puede tener más de 100 caracteres")
     @Column(name = "apellido_materno", length = 100)
     private String apellidoMaterno;
 
+    @NotBlank(message = "El correo es obligatorio")
+    @Email(message = "El correo no tiene un formato válido")
+    @Size(max = 150, message = "El correo no puede tener más de 150 caracteres")
     @Column(name = "correo", nullable = false, unique = true, length = 150)
     private String correo;
 
+    @NotBlank(message = "El username es obligatorio")
+    @Size(min = 3, max = 100, message = "El username debe tener entre 3 y 100 caracteres")
     @Column(name = "username", nullable = false, unique = true, length = 100)
     private String username;
 
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     @Column(name = "password", nullable = false)
     private String password;
 
+    @DecimalMin(value = "0.0", message = "El salario no puede ser negativo")
     @Column(name = "salario", precision = 10, scale = 2)
     private BigDecimal salario;
 
@@ -48,9 +63,16 @@ public class Usuario implements UserDetails {
     @Column(name = "estatus", nullable = false, length = 20)
     private String estatus;
 
+    @NotNull(message = "El rol es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
+
+    @Column(name = "INTENTOS_FALLIDOS")
+    private int intentosFallidos = 0;
+
+    @Column(name = "FECHA_BLOQUEO")
+    private LocalDateTime fechaBloqueo;
 
     public Usuario() {}
 
@@ -70,7 +92,7 @@ public class Usuario implements UserDetails {
         this.rol = rol;
     }
 
-    // ── UserDetails ──────────────────────────────────────────────────────────
+    // ── UserDetails ───────────────────────────────────────────────────────────
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
@@ -111,7 +133,6 @@ public class Usuario implements UserDetails {
     public void setCorreo(String correo) { this.correo = correo; }
 
     public void setUsername(String username) { this.username = username; }
-
     public void setPassword(String password) { this.password = password; }
 
     public BigDecimal getSalario() { return salario; }
@@ -125,4 +146,10 @@ public class Usuario implements UserDetails {
 
     public Rol getRol() { return rol; }
     public void setRol(Rol rol) { this.rol = rol; }
+
+    public int getIntentosFallidos() { return intentosFallidos; }
+    public void setIntentosFallidos(int intentosFallidos) { this.intentosFallidos = intentosFallidos; }
+
+    public LocalDateTime getFechaBloqueo() { return fechaBloqueo; }
+    public void setFechaBloqueo(LocalDateTime fechaBloqueo) { this.fechaBloqueo = fechaBloqueo; }
 }

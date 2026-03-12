@@ -8,4 +8,5 @@ public interface TareaRepository extends JpaRepository<Tarea, Long> {
     List<Tarea> findByUsuarioAsignadoIdUsuario(Long idUsuario);
     List<Tarea> findByEstado(String estado);
     List<Tarea> findByProyectoIdProyectoAndEstado(Long idProyecto, String estado);
+    List<Tarea> findByProyectoEquipoIdEquipoAndEstadoIn(Long idEquipo, List<String> estados);
 }

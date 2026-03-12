@@ -1,5 +1,6 @@
 package utez.edu.mx.services.module.pago;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
@@ -36,12 +37,12 @@ public class PagoController {
     }
 
     @PostMapping
-    public ResponseEntity<AppiResponse> save(@RequestBody Pago pago) {
+    public ResponseEntity<AppiResponse> save(@Valid @RequestBody Pago pago) {
         return pagoService.save(pago);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppiResponse> update(@PathVariable Long id, @RequestBody Pago pago) {
+    public ResponseEntity<AppiResponse> update(@Valid @PathVariable Long id, @RequestBody Pago pago) {
         return pagoService.update(id, pago);
     }
 
