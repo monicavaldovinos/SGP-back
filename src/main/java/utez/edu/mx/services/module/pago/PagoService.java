@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.pago.dto.PagoDTO;
 import utez.edu.mx.services.module.presupuesto.Presupuesto;
 import utez.edu.mx.services.module.presupuesto.PresupuestoRepository;
 
@@ -26,7 +27,9 @@ public class PagoService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", pagoRepository.findAll(), HttpStatus.OK));
+        List<PagoDTO> pagos = pagoRepository.findAll()
+                .stream().map(PagoDTO::new).toList();
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", pagos, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
@@ -34,18 +37,20 @@ public class PagoService {
         Optional<Pago> p = pagoRepository.findById(id);
         if (p.isEmpty())
             return ResponseEntity.badRequest().body(new AppiResponse("Pago no encontrado", HttpStatus.BAD_REQUEST));
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", p.get(), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", new PagoDTO(p.get()), HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByProyecto(Long idProyecto) {
-        List<Pago> pagos = pagoRepository.findByProyectoIdProyecto(idProyecto);
+        List<PagoDTO> pagos = pagoRepository.findByProyectoIdProyecto(idProyecto)
+                .stream().map(PagoDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", pagos, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByUsuario(Long idUsuario) {
-        List<Pago> pagos = pagoRepository.findByUsuarioIdUsuario(idUsuario);
+        List<PagoDTO> pagos = pagoRepository.findByUsuarioIdUsuario(idUsuario)
+                .stream().map(PagoDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", pagos, HttpStatus.OK));
     }
 
@@ -114,7 +119,7 @@ public class PagoService {
             return ResponseEntity.ok(new AppiResponse("Pago registrado exitosamente", data, HttpStatus.OK));
         }
 
-        return ResponseEntity.ok(new AppiResponse("Pago registrado exitosamente", saved, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Pago registrado exitosamente", new PagoDTO(saved), HttpStatus.OK));
     }
 
     @Transactional

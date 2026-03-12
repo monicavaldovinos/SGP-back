@@ -6,9 +6,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.usuario.dto.UsuarioDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,7 +36,11 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", usuarioRepository.findAll(), HttpStatus.OK));
+        List<UsuarioDTO> usuarios = usuarioRepository.findAll()
+                .stream()
+                .map(UsuarioDTO::new)
+                .toList();
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", usuarios, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
@@ -42,7 +48,7 @@ public class UsuarioService {
         Optional<Usuario> u = usuarioRepository.findById(id);
         if (u.isEmpty())
             return ResponseEntity.badRequest().body(new AppiResponse("Usuario no encontrado", HttpStatus.BAD_REQUEST));
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", u.get(), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", new UsuarioDTO(u.get()), HttpStatus.OK));
     }
 
     @Transactional
@@ -61,7 +67,7 @@ public class UsuarioService {
         usuario.setEstatus("ACTIVO");
         usuario.setIntentosFallidos(0);
         Usuario saved = usuarioRepository.save(usuario);
-        return ResponseEntity.ok(new AppiResponse("Usuario registrado exitosamente", saved, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Usuario registrado exitosamente", new UsuarioDTO(saved), HttpStatus.OK));
     }
 
     @Transactional
@@ -77,7 +83,7 @@ public class UsuarioService {
         u.setCorreo(usuario.getCorreo());
         u.setSalario(usuario.getSalario());
         u.setRol(usuario.getRol());
-        return ResponseEntity.ok(new AppiResponse("Usuario actualizado exitosamente", usuarioRepository.save(u), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Usuario actualizado exitosamente", new UsuarioDTO(usuarioRepository.save(u)), HttpStatus.OK));
     }
 
     @Transactional

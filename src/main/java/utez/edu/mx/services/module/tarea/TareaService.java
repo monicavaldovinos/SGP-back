@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.tarea.dto.TareaDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +22,9 @@ public class TareaService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", tareaRepository.findAll(), HttpStatus.OK));
+        List<TareaDTO> tareas = tareaRepository.findAll()
+                .stream().map(TareaDTO::new).toList();
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", tareas, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
@@ -29,24 +32,27 @@ public class TareaService {
         Optional<Tarea> t = tareaRepository.findById(id);
         if (t.isEmpty())
             return ResponseEntity.badRequest().body(new AppiResponse("Tarea no encontrada", HttpStatus.BAD_REQUEST));
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", t.get(), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", new TareaDTO(t.get()), HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByProyecto(Long idProyecto) {
-        List<Tarea> tareas = tareaRepository.findByProyectoIdProyecto(idProyecto);
+        List<TareaDTO> tareas = tareaRepository.findByProyectoIdProyecto(idProyecto)
+                .stream().map(TareaDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", tareas, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByUsuario(Long idUsuario) {
-        List<Tarea> tareas = tareaRepository.findByUsuarioAsignadoIdUsuario(idUsuario);
+        List<TareaDTO> tareas = tareaRepository.findByUsuarioAsignadoIdUsuario(idUsuario)
+                .stream().map(TareaDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", tareas, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByProyectoAndEstado(Long idProyecto, String estado) {
-        List<Tarea> tareas = tareaRepository.findByProyectoIdProyectoAndEstado(idProyecto, estado);
+        List<TareaDTO> tareas = tareaRepository.findByProyectoIdProyectoAndEstado(idProyecto, estado)
+                .stream().map(TareaDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", tareas, HttpStatus.OK));
     }
 
@@ -55,7 +61,7 @@ public class TareaService {
         tarea.setFechaInicio(LocalDate.now());
         tarea.setEstado("PENDIENTE");
         Tarea saved = tareaRepository.save(tarea);
-        return ResponseEntity.ok(new AppiResponse("Tarea registrada exitosamente", saved, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Tarea registrada exitosamente", new TareaDTO(saved), HttpStatus.OK));
     }
 
     @Transactional
@@ -70,8 +76,7 @@ public class TareaService {
         t.setFechaFin(tarea.getFechaFin());
         t.setPrioridad(tarea.getPrioridad());
         t.setUsuarioAsignado(tarea.getUsuarioAsignado());
-        Tarea updated = tareaRepository.save(t);
-        return ResponseEntity.ok(new AppiResponse("Tarea actualizada exitosamente", updated, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Tarea actualizada exitosamente", new TareaDTO(tareaRepository.save(t)), HttpStatus.OK));
     }
 
     @Transactional

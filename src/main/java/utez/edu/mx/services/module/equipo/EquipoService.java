@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.equipo.dto.EquipoDTO;
 import utez.edu.mx.services.module.tarea.TareaRepository;
 
 import java.time.LocalDate;
@@ -24,7 +25,8 @@ public class EquipoService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        List<Equipo> equipos = equipoRepository.findByEstatus("ACTIVO");
+        List<EquipoDTO> equipos = equipoRepository.findByEstatus("ACTIVO")
+                .stream().map(EquipoDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", equipos, HttpStatus.OK));
     }
 
@@ -34,7 +36,7 @@ public class EquipoService {
         if (equipo.isEmpty())
             return ResponseEntity.badRequest()
                     .body(new AppiResponse("Equipo no encontrado", HttpStatus.BAD_REQUEST));
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", equipo.get(), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", new EquipoDTO(equipo.get()), HttpStatus.OK));
     }
 
     @Transactional
@@ -46,7 +48,7 @@ public class EquipoService {
         equipo.setFechaCreacion(LocalDate.now());
         equipo.setEstatus("ACTIVO");
         Equipo saved = equipoRepository.save(equipo);
-        return ResponseEntity.ok(new AppiResponse("Equipo registrado exitosamente", saved, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Equipo registrado exitosamente", new EquipoDTO(saved), HttpStatus.OK));
     }
 
     @Transactional
@@ -67,7 +69,7 @@ public class EquipoService {
         e.setNombreEquipo(equipo.getNombreEquipo());
         e.setDescripcion(equipo.getDescripcion());
         e.setLogo(equipo.getLogo());
-        return ResponseEntity.ok(new AppiResponse("Equipo actualizado exitosamente", equipoRepository.save(e), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Equipo actualizado exitosamente", new EquipoDTO(equipoRepository.save(e)), HttpStatus.OK));
     }
 
     @Transactional

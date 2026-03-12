@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.material.dto.MaterialDTO;
 import utez.edu.mx.services.module.presupuesto.Presupuesto;
 import utez.edu.mx.services.module.presupuesto.PresupuestoRepository;
 
@@ -25,7 +26,9 @@ public class MaterialService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", materialRepository.findAll(), HttpStatus.OK));
+        List<MaterialDTO> materiales = materialRepository.findAll()
+                .stream().map(MaterialDTO::new).toList();
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", materiales, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
@@ -33,12 +36,13 @@ public class MaterialService {
         Optional<Material> m = materialRepository.findById(id);
         if (m.isEmpty())
             return ResponseEntity.badRequest().body(new AppiResponse("Material no encontrado", HttpStatus.BAD_REQUEST));
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", m.get(), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", new MaterialDTO(m.get()), HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByProyecto(Long idProyecto) {
-        List<Material> materiales = materialRepository.findByProyectoIdProyecto(idProyecto);
+        List<MaterialDTO> materiales = materialRepository.findByProyectoIdProyecto(idProyecto)
+                .stream().map(MaterialDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", materiales, HttpStatus.OK));
     }
 
@@ -77,7 +81,7 @@ public class MaterialService {
         presupuestoRepository.save(presupuesto);
 
         Material saved = materialRepository.save(material);
-        return ResponseEntity.ok(new AppiResponse("Material registrado exitosamente", saved, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Material registrado exitosamente", new MaterialDTO(saved), HttpStatus.OK));
     }
 
     @Transactional
@@ -125,7 +129,7 @@ public class MaterialService {
         m.setPrecio(material.getPrecio());
         m.setTotal(nuevoTotal);
         m.setCategoria(material.getCategoria());
-        return ResponseEntity.ok(new AppiResponse("Material actualizado exitosamente", materialRepository.save(m), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Material actualizado exitosamente", new MaterialDTO(materialRepository.save(m)), HttpStatus.OK));
     }
 
     @Transactional

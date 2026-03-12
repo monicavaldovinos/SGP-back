@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.equipousuario.dto.EquipoUsuarioDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,75 +20,69 @@ public class EquipoUsuarioService {
         this.equipoUsuarioRepository = equipoUsuarioRepository;
     }
 
-    // GET ALL
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        List<EquipoUsuario> lista = equipoUsuarioRepository.findAll();
+        List<EquipoUsuarioDTO> lista = equipoUsuarioRepository.findAll()
+                .stream().map(EquipoUsuarioDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", lista, HttpStatus.OK));
     }
 
-    // GET BY ID
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findById(Long id) {
         Optional<EquipoUsuario> eu = equipoUsuarioRepository.findById(id);
-        if (eu.isEmpty()) {
+        if (eu.isEmpty())
             return ResponseEntity.badRequest()
                     .body(new AppiResponse("Relación no encontrada", HttpStatus.BAD_REQUEST));
-        }
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", eu.get(), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", new EquipoUsuarioDTO(eu.get()), HttpStatus.OK));
     }
 
-    // GET BY EQUIPO
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByEquipo(Long idEquipo) {
-        List<EquipoUsuario> lista = equipoUsuarioRepository.findByEquipoIdEquipo(idEquipo);
+        List<EquipoUsuarioDTO> lista = equipoUsuarioRepository.findByEquipoIdEquipo(idEquipo)
+                .stream().map(EquipoUsuarioDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", lista, HttpStatus.OK));
     }
 
-    // GET BY USUARIO
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByUsuario(Long idUsuario) {
-        List<EquipoUsuario> lista = equipoUsuarioRepository.findByUsuarioIdUsuario(idUsuario);
+        List<EquipoUsuarioDTO> lista = equipoUsuarioRepository.findByUsuarioIdUsuario(idUsuario)
+                .stream().map(EquipoUsuarioDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", lista, HttpStatus.OK));
     }
 
-    // SAVE
     @Transactional
     public ResponseEntity<AppiResponse> save(EquipoUsuario equipoUsuario) {
         Long idEquipo = equipoUsuario.getEquipo().getIdEquipo();
         Long idUsuario = equipoUsuario.getUsuario().getIdUsuario();
 
-        if (equipoUsuarioRepository.existsByEquipoIdEquipoAndUsuarioIdUsuario(idEquipo, idUsuario)) {
+        if (equipoUsuarioRepository.existsByEquipoIdEquipoAndUsuarioIdUsuario(idEquipo, idUsuario))
             return ResponseEntity.badRequest()
                     .body(new AppiResponse("El usuario ya pertenece a este equipo", HttpStatus.BAD_REQUEST));
-        }
+
         equipoUsuario.setFechaUnion(LocalDate.now());
         EquipoUsuario saved = equipoUsuarioRepository.save(equipoUsuario);
-        return ResponseEntity.ok(new AppiResponse("Usuario agregado al equipo exitosamente", saved, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Usuario agregado al equipo exitosamente", new EquipoUsuarioDTO(saved), HttpStatus.OK));
     }
 
-    // UPDATE
     @Transactional
     public ResponseEntity<AppiResponse> update(Long id, EquipoUsuario equipoUsuario) {
         Optional<EquipoUsuario> existing = equipoUsuarioRepository.findById(id);
-        if (existing.isEmpty()) {
+        if (existing.isEmpty())
             return ResponseEntity.badRequest()
                     .body(new AppiResponse("Relación no encontrada", HttpStatus.BAD_REQUEST));
-        }
+
         EquipoUsuario eu = existing.get();
         eu.setRolEnEquipo(equipoUsuario.getRolEnEquipo());
-        EquipoUsuario updated = equipoUsuarioRepository.save(eu);
-        return ResponseEntity.ok(new AppiResponse("Relación actualizada exitosamente", updated, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Relación actualizada exitosamente", new EquipoUsuarioDTO(equipoUsuarioRepository.save(eu)), HttpStatus.OK));
     }
 
-    // DELETE
     @Transactional
     public ResponseEntity<AppiResponse> delete(Long id) {
         Optional<EquipoUsuario> existing = equipoUsuarioRepository.findById(id);
-        if (existing.isEmpty()) {
+        if (existing.isEmpty())
             return ResponseEntity.badRequest()
                     .body(new AppiResponse("Relación no encontrada", HttpStatus.BAD_REQUEST));
-        }
+
         equipoUsuarioRepository.deleteById(id);
         return ResponseEntity.ok(new AppiResponse("Usuario removido del equipo exitosamente", HttpStatus.OK));
     }

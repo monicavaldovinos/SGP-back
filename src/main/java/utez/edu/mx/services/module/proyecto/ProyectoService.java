@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.proyecto.dto.ProyectoDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,7 +23,8 @@ public class ProyectoService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findAll() {
-        List<Proyecto> proyectos = proyectoRepository.findAll();
+        List<ProyectoDTO> proyectos = proyectoRepository.findAll()
+                .stream().map(ProyectoDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", proyectos, HttpStatus.OK));
     }
 
@@ -32,18 +34,20 @@ public class ProyectoService {
         if (proyecto.isEmpty())
             return ResponseEntity.badRequest()
                     .body(new AppiResponse("Proyecto no encontrado", HttpStatus.BAD_REQUEST));
-        return ResponseEntity.ok(new AppiResponse("Operación exitosa", proyecto.get(), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", new ProyectoDTO(proyecto.get()), HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByEquipo(Long idEquipo) {
-        List<Proyecto> proyectos = proyectoRepository.findByEquipoIdEquipo(idEquipo);
+        List<ProyectoDTO> proyectos = proyectoRepository.findByEquipoIdEquipo(idEquipo)
+                .stream().map(ProyectoDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", proyectos, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<AppiResponse> findByLider(Long idUsuario) {
-        List<Proyecto> proyectos = proyectoRepository.findByLiderIdUsuario(idUsuario);
+        List<ProyectoDTO> proyectos = proyectoRepository.findByLiderIdUsuario(idUsuario)
+                .stream().map(ProyectoDTO::new).toList();
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", proyectos, HttpStatus.OK));
     }
 
@@ -67,7 +71,7 @@ public class ProyectoService {
         proyecto.setFechaInicio(LocalDate.now());
         proyecto.setEstado("PENDIENTE");
         Proyecto saved = proyectoRepository.save(proyecto);
-        return ResponseEntity.ok(new AppiResponse("Proyecto registrado exitosamente", saved, HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Proyecto registrado exitosamente", new ProyectoDTO(saved), HttpStatus.OK));
     }
 
     @Transactional
@@ -104,7 +108,7 @@ public class ProyectoService {
         p.setLogo(proyecto.getLogo());
         p.setEquipo(proyecto.getEquipo());
         p.setLider(proyecto.getLider());
-        return ResponseEntity.ok(new AppiResponse("Proyecto actualizado exitosamente", proyectoRepository.save(p), HttpStatus.OK));
+        return ResponseEntity.ok(new AppiResponse("Proyecto actualizado exitosamente", new ProyectoDTO(proyectoRepository.save(p)), HttpStatus.OK));
     }
 
     @Transactional
