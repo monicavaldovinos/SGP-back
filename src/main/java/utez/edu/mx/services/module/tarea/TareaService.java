@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
 import utez.edu.mx.services.module.tarea.dto.TareaDTO;
+import utez.edu.mx.services.module.usuario.Usuario;
+import utez.edu.mx.services.module.usuario.UsuarioRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,9 +17,11 @@ import java.util.Optional;
 public class TareaService {
 
     private final TareaRepository tareaRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public TareaService(TareaRepository tareaRepository) {
+    public TareaService(TareaRepository tareaRepository, UsuarioRepository usuarioRepository) {
         this.tareaRepository = tareaRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional(readOnly = true)
@@ -33,6 +37,27 @@ public class TareaService {
         if (t.isEmpty())
             return ResponseEntity.badRequest().body(new AppiResponse("Tarea no encontrada", HttpStatus.BAD_REQUEST));
         return ResponseEntity.ok(new AppiResponse("Operación exitosa", new TareaDTO(t.get()), HttpStatus.OK));
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<AppiResponse> findMisTareas(String username) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(username);
+
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new AppiResponse("Usuario no encontrado", HttpStatus.NOT_FOUND));
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        String rol = usuario.getRol() != null ? usuario.getRol().getNombre().toUpperCase() : "";
+
+        List<TareaDTO> data = ("SUPERADMIN".equals(rol)
+                ? tareaRepository.findAll().stream()
+                : tareaRepository.findByUsuarioAsignadoIdUsuario(usuario.getIdUsuario()).stream())
+                .map(TareaDTO::new)
+                .toList();
+
+        return ResponseEntity.ok(new AppiResponse("Operación exitosa", data, HttpStatus.OK));
     }
 
     @Transactional(readOnly = true)

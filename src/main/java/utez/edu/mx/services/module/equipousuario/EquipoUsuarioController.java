@@ -1,8 +1,10 @@
 package utez.edu.mx.services.module.equipousuario;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.equipousuario.dto.CambiarLiderRequestDTO;
 
 @RestController
 @RequestMapping("/sgp-api/equipo-usuario")
@@ -15,38 +17,24 @@ public class EquipoUsuarioController {
         this.equipoUsuarioService = equipoUsuarioService;
     }
 
-    @GetMapping
-    public ResponseEntity<AppiResponse> findAll() {
-        return equipoUsuarioService.findAll();
+    @PostMapping("/asignar")
+    public ResponseEntity<AppiResponse> asignarUsuarioAEquipo(
+            @RequestParam Long idEquipo,
+            @RequestParam Long idUsuario
+    ) {
+        return equipoUsuarioService.asignarUsuarioAEquipo(idEquipo, idUsuario);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AppiResponse> findById(@PathVariable Long id) {
-        return equipoUsuarioService.findById(id);
+    @PostMapping("/cambiar-lider")
+    public ResponseEntity<AppiResponse> cambiarLider(@Valid @RequestBody CambiarLiderRequestDTO dto) {
+        return equipoUsuarioService.cambiarLider(dto);
     }
 
-    @GetMapping("/equipo/{idEquipo}")
-    public ResponseEntity<AppiResponse> findByEquipo(@PathVariable Long idEquipo) {
-        return equipoUsuarioService.findByEquipo(idEquipo);
-    }
-
-    @GetMapping("/usuario/{idUsuario}")
-    public ResponseEntity<AppiResponse> findByUsuario(@PathVariable Long idUsuario) {
-        return equipoUsuarioService.findByUsuario(idUsuario);
-    }
-
-    @PostMapping
-    public ResponseEntity<AppiResponse> save(@RequestBody EquipoUsuario equipoUsuario) {
-        return equipoUsuarioService.save(equipoUsuario);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<AppiResponse> update(@PathVariable Long id, @RequestBody EquipoUsuario equipoUsuario) {
-        return equipoUsuarioService.update(id, equipoUsuario);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<AppiResponse> delete(@PathVariable Long id) {
-        return equipoUsuarioService.delete(id);
+    @DeleteMapping("/quitar")
+    public ResponseEntity<AppiResponse> quitarUsuarioDeEquipo(
+            @RequestParam Long idEquipo,
+            @RequestParam Long idUsuario
+    ) {
+        return equipoUsuarioService.quitarUsuarioDeEquipo(idEquipo, idUsuario);
     }
 }

@@ -2,6 +2,7 @@ package utez.edu.mx.services.module.usuario;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
 
@@ -24,6 +25,11 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<AppiResponse> findById(@PathVariable Long id) {
         return usuarioService.findById(id);
+    }
+
+    @GetMapping("/mi-perfil")
+    public ResponseEntity<AppiResponse> miPerfil(Authentication authentication) {
+        return usuarioService.miPerfil(authentication.getName());
     }
 
     @PostMapping

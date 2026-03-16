@@ -2,6 +2,7 @@ package utez.edu.mx.services.module.tarea;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
 
@@ -24,6 +25,11 @@ public class TareaController {
     @GetMapping("/{id}")
     public ResponseEntity<AppiResponse> findById(@PathVariable Long id) {
         return tareaService.findById(id);
+    }
+
+    @GetMapping("/mis-tareas")
+    public ResponseEntity<AppiResponse> misTareas(Authentication authentication) {
+        return tareaService.findMisTareas(authentication.getName());
     }
 
     @GetMapping("/proyecto/{idProyecto}")

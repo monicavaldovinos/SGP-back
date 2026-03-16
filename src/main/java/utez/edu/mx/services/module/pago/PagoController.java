@@ -2,8 +2,11 @@ package utez.edu.mx.services.module.pago;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.pago.dto.GenerarPagosPeriodoDTO;
+import utez.edu.mx.services.module.pago.dto.RealizarPagoDTO;
 
 @RestController
 @RequestMapping("/sgp-api/pagos")
@@ -26,6 +29,11 @@ public class PagoController {
         return pagoService.findById(id);
     }
 
+    @GetMapping("/mis-pagos")
+    public ResponseEntity<AppiResponse> misPagos(Authentication authentication) {
+        return pagoService.findMisPagos(authentication.getName());
+    }
+
     @GetMapping("/proyecto/{idProyecto}")
     public ResponseEntity<AppiResponse> findByProyecto(@PathVariable Long idProyecto) {
         return pagoService.findByProyecto(idProyecto);
@@ -39,6 +47,23 @@ public class PagoController {
     @PostMapping
     public ResponseEntity<AppiResponse> save(@Valid @RequestBody Pago pago) {
         return pagoService.save(pago);
+    }
+
+    @PostMapping("/generar-periodo")
+    public ResponseEntity<AppiResponse> generarPagosPeriodo(
+            @RequestBody GenerarPagosPeriodoDTO dto,
+            Authentication authentication
+    ) {
+        return pagoService.generarPagosPeriodo(dto, authentication.getName());
+    }
+
+    @PatchMapping("/{id}/realizar")
+    public ResponseEntity<AppiResponse> realizarPago(
+            @PathVariable Long id,
+            @RequestBody RealizarPagoDTO dto,
+            Authentication authentication
+    ) {
+        return pagoService.realizarPago(id, dto, authentication.getName());
     }
 
     @PutMapping("/{id}")
@@ -55,4 +80,10 @@ public class PagoController {
     public ResponseEntity<AppiResponse> delete(@PathVariable Long id) {
         return pagoService.delete(id);
     }
+
+    @GetMapping("/resumen/{idProyecto}")
+    public ResponseEntity<AppiResponse> resumenPorProyecto(@PathVariable Long idProyecto) {
+        return pagoService.resumenPorProyecto(idProyecto);
+    }
+
 }

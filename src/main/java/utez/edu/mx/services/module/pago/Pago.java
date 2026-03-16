@@ -29,7 +29,7 @@ public class Pago {
     private String descripcion;
 
     @NotNull(message = "El monto es obligatorio")
-    @DecimalMin(value = "0.01", message = "El monto debe ser mayor a 0")
+    @DecimalMin(value = "0.0", message = "El monto no puede ser negativo")
     @Column(name = "monto", nullable = false, precision = 10, scale = 2)
     private BigDecimal monto;
 
@@ -48,7 +48,7 @@ public class Pago {
     @Column(name = "periodo", length = 50)
     private String periodo;
 
-    @Column(name = "fecha_pago", nullable = false)
+    @Column(name = "fecha_pago", nullable = true)
     private LocalDate fechaPago;
 
     @Column(name = "estatus", nullable = false, length = 20)

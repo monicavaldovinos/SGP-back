@@ -2,6 +2,7 @@ package utez.edu.mx.services.module.proyecto;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.services.kernel.AppiResponse;
 
@@ -24,6 +25,11 @@ public class ProyectoController {
     @GetMapping("/{id}")
     public ResponseEntity<AppiResponse> findById(@PathVariable Long id) {
         return proyectoService.findById(id);
+    }
+
+    @GetMapping("/mis-proyectos")
+    public ResponseEntity<AppiResponse> misProyectos(Authentication authentication) {
+        return proyectoService.findMisProyectos(authentication.getName());
     }
 
     @GetMapping("/equipo/{idEquipo}")
@@ -54,5 +60,10 @@ public class ProyectoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<AppiResponse> delete(@PathVariable Long id) {
         return proyectoService.delete(id);
+    }
+
+    @GetMapping("/{id}/progreso")
+    public ResponseEntity<AppiResponse> getProgreso(@PathVariable Long id) {
+        return proyectoService.getProgreso(id);
     }
 }

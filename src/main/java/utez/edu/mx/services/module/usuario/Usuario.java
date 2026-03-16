@@ -63,7 +63,6 @@ public class Usuario implements UserDetails {
     @Column(name = "estatus", nullable = false, length = 20)
     private String estatus;
 
-    @NotNull(message = "El rol es obligatorio")
     @ManyToOne
     @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
@@ -73,6 +72,12 @@ public class Usuario implements UserDetails {
 
     @Column(name = "FECHA_BLOQUEO")
     private LocalDateTime fechaBloqueo;
+
+    @Column(name = "token_recuperacion", length = 255)
+    private String tokenRecuperacion;
+
+    @Column(name = "expiracion_token")
+    private LocalDateTime expiracionToken;
 
     public Usuario() {}
 
@@ -92,7 +97,6 @@ public class Usuario implements UserDetails {
         this.rol = rol;
     }
 
-    // ── UserDetails ───────────────────────────────────────────────────────────
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol.getNombre()));
@@ -116,7 +120,6 @@ public class Usuario implements UserDetails {
     @Override
     public boolean isEnabled() { return "ACTIVO".equals(estatus); }
 
-    // ── Getters & Setters ─────────────────────────────────────────────────────
     public Long getIdUsuario() { return idUsuario; }
     public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
 
@@ -152,4 +155,10 @@ public class Usuario implements UserDetails {
 
     public LocalDateTime getFechaBloqueo() { return fechaBloqueo; }
     public void setFechaBloqueo(LocalDateTime fechaBloqueo) { this.fechaBloqueo = fechaBloqueo; }
+
+    public String getTokenRecuperacion() { return tokenRecuperacion; }
+    public void setTokenRecuperacion(String tokenRecuperacion) { this.tokenRecuperacion = tokenRecuperacion; }
+
+    public LocalDateTime getExpiracionToken() { return expiracionToken; }
+    public void setExpiracionToken(LocalDateTime expiracionToken) { this.expiracionToken = expiracionToken; }
 }
