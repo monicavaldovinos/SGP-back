@@ -1,6 +1,6 @@
-package utez.edu.mx.services.module.equipousuario.dto;
+package utez.edu.mx.services.module.equipousuario;
 
-import utez.edu.mx.services.module.equipo.dto.EquipoDTO;
+import utez.edu.mx.services.module.equipo.EquipoDTO;
 import utez.edu.mx.services.module.equipousuario.EquipoUsuario;
 import utez.edu.mx.services.module.usuario.dto.UsuarioDTO;
 

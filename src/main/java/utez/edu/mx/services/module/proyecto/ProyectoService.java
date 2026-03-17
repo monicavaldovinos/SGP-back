@@ -144,6 +144,22 @@ public class ProyectoService {
                     .body(new AppiResponse("El nombre del proyecto ya está en uso", HttpStatus.BAD_REQUEST));
         }
 
+        if (proyecto.getEquipo() == null || proyecto.getEquipo().getIdEquipo() == null) {
+            return ResponseEntity.badRequest()
+                    .body(new AppiResponse("Debes asignar un equipo al proyecto", HttpStatus.BAD_REQUEST));
+        }
+
+        boolean equipoConProyectoActivo = proyectoRepository
+                .existsByEquipoIdEquipoAndEstadoNotIgnoreCase(proyecto.getEquipo().getIdEquipo(), "CANCELADO");
+
+        if (equipoConProyectoActivo) {
+            return ResponseEntity.badRequest()
+                    .body(new AppiResponse(
+                            "Ese equipo ya tiene un proyecto activo o pendiente asignado",
+                            HttpStatus.BAD_REQUEST
+                    ));
+        }
+
         if (proyecto.getPresupuestoTotal() != null &&
                 proyecto.getPresupuestoTotal().compareTo(BigDecimal.ZERO) <= 0) {
             return ResponseEntity.badRequest()
@@ -151,7 +167,10 @@ public class ProyectoService {
         }
 
         proyecto.setFechaInicio(LocalDate.now());
-        proyecto.setEstado("PENDIENTE");
+
+        if (proyecto.getEstado() == null || proyecto.getEstado().isBlank()) {
+            proyecto.setEstado("PENDIENTE");
+        }
 
         Proyecto saved = proyectoRepository.save(proyecto);
 
@@ -181,6 +200,26 @@ public class ProyectoService {
         if (nombreDuplicado) {
             return ResponseEntity.badRequest()
                     .body(new AppiResponse("El nombre del proyecto ya está en uso", HttpStatus.BAD_REQUEST));
+        }
+
+        if (proyecto.getEquipo() == null || proyecto.getEquipo().getIdEquipo() == null) {
+            return ResponseEntity.badRequest()
+                    .body(new AppiResponse("Debes asignar un equipo al proyecto", HttpStatus.BAD_REQUEST));
+        }
+
+        boolean equipoConOtroProyectoActivo = proyectoRepository
+                .existsByEquipoIdEquipoAndEstadoNotIgnoreCaseAndIdProyectoNot(
+                        proyecto.getEquipo().getIdEquipo(),
+                        "CANCELADO",
+                        id
+                );
+
+        if (equipoConOtroProyectoActivo) {
+            return ResponseEntity.badRequest()
+                    .body(new AppiResponse(
+                            "Ese equipo ya tiene otro proyecto activo o pendiente asignado",
+                            HttpStatus.BAD_REQUEST
+                    ));
         }
 
         if (proyecto.getPresupuestoTotal() != null &&

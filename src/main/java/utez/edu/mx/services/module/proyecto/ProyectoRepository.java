@@ -19,4 +19,8 @@ public interface ProyectoRepository extends JpaRepository<Proyecto, Long> {
     List<Proyecto> findByEquipoIdEquipoAndEstadoNotIgnoreCase(Long idEquipo, String estado);
 
     List<Proyecto> findByLiderIdUsuarioAndEstadoNotIgnoreCase(Long idUsuario, String estado);
+
+    boolean existsByEquipoIdEquipoAndEstadoNotIgnoreCase(Long idEquipo, String estado);
+
+    boolean existsByEquipoIdEquipoAndEstadoNotIgnoreCaseAndIdProyectoNot(Long idEquipo, String estado, Long idProyecto);
 }

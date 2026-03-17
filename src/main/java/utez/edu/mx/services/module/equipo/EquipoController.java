@@ -50,6 +50,7 @@ public class EquipoController {
 
     @PostMapping("/crear-con-miembros")
     public ResponseEntity<AppiResponse> crearConMiembros(@Valid @RequestBody CreateTeamRequestDTO dto) {
+        System.out.println(">>> SI ENTRO A crear-con-miembros");
         return equipoService.crearEquipoConMiembros(dto);
     }
 
@@ -61,5 +62,10 @@ public class EquipoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<AppiResponse> delete(@PathVariable Long id) {
         return equipoService.delete(id);
+    }
+
+    @GetMapping("/disponibles-proyecto")
+    public ResponseEntity<AppiResponse> disponiblesParaProyecto() {
+        return equipoService.findDisponiblesParaProyecto();
     }
 }

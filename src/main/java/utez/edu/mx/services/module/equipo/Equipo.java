@@ -2,6 +2,7 @@ package utez.edu.mx.services.module.equipo;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import utez.edu.mx.services.module.proyecto.Proyecto;
 
 import java.time.LocalDate;
 

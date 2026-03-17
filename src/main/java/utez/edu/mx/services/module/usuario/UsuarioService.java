@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.services.kernel.AppiResponse;
+import utez.edu.mx.services.module.equipousuario.EquipoUsuarioRepository;
 import utez.edu.mx.services.module.rol.Rol;
 import utez.edu.mx.services.module.rol.RolRepository;
 import utez.edu.mx.services.module.usuario.dto.UsuarioDTO;
@@ -22,15 +23,18 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final RolRepository rolRepository;
+    private final EquipoUsuarioRepository equipoUsuarioRepository;
 
     public UsuarioService(
             UsuarioRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
-            RolRepository rolRepository
+            RolRepository rolRepository,
+            EquipoUsuarioRepository equipoUsuarioRepository
     ) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.rolRepository = rolRepository;
+        this.equipoUsuarioRepository = equipoUsuarioRepository;
     }
 
     private boolean passwordSegura(String password) {
@@ -262,5 +266,17 @@ public class UsuarioService {
 
             return true;
         }).orElse(false);
+    }
+    @Transactional(readOnly = true)
+    public ResponseEntity<AppiResponse> findDisponiblesParaEquipo() {
+        List<Usuario> usuariosDisponibles = usuarioRepository.findAll()
+                .stream()
+                .filter(usuario -> "ACTIVO".equalsIgnoreCase(usuario.getEstatus()))
+                .filter(usuario -> !equipoUsuarioRepository.existsByUsuarioIdUsuario(usuario.getIdUsuario()))
+                .toList();
+
+        return ResponseEntity.ok(
+                new AppiResponse("Usuarios disponibles para equipo obtenidos correctamente", usuariosDisponibles, HttpStatus.OK)
+        );
     }
 }

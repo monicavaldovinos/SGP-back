@@ -11,14 +11,16 @@ public class CreateTeamRequestDTO {
     @NotBlank(message = "El nombre del equipo es obligatorio")
     private String nombreEquipo;
 
-    private String descripcion;
-    private String logo;
+    @NotNull(message = "Debes seleccionar un proyecto")
+    private Long idProyecto;
 
     @NotNull(message = "Debes seleccionar un líder")
     private Long idLider;
 
     @NotEmpty(message = "Debes seleccionar integrantes")
     private List<Long> integrantesIds;
+
+    private String logo;
 
     public CreateTeamRequestDTO() {
     }
@@ -31,20 +33,12 @@ public class CreateTeamRequestDTO {
         this.nombreEquipo = nombreEquipo;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public Long getIdProyecto() {
+        return idProyecto;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public String getLogo() {
-        return logo;
-    }
-
-    public void setLogo(String logo) {
-        this.logo = logo;
+    public void setIdProyecto(Long idProyecto) {
+        this.idProyecto = idProyecto;
     }
 
     public Long getIdLider() {
@@ -61,5 +55,13 @@ public class CreateTeamRequestDTO {
 
     public void setIntegrantesIds(List<Long> integrantesIds) {
         this.integrantesIds = integrantesIds;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 }

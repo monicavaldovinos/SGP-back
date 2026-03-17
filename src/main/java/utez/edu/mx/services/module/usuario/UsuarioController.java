@@ -51,4 +51,9 @@ public class UsuarioController {
     public ResponseEntity<AppiResponse> delete(@PathVariable Long id) {
         return usuarioService.delete(id);
     }
+
+    @GetMapping("/disponibles-equipo")
+    public ResponseEntity<AppiResponse> disponiblesParaEquipo() {
+        return usuarioService.findDisponiblesParaEquipo();
+    }
 }

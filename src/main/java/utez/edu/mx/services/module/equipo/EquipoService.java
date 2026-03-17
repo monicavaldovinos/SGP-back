@@ -8,6 +8,8 @@ import utez.edu.mx.services.kernel.AppiResponse;
 import utez.edu.mx.services.module.equipo.dto.CreateTeamRequestDTO;
 import utez.edu.mx.services.module.equipousuario.EquipoUsuario;
 import utez.edu.mx.services.module.equipousuario.EquipoUsuarioRepository;
+import utez.edu.mx.services.module.proyecto.Proyecto;
+import utez.edu.mx.services.module.proyecto.ProyectoRepository;
 import utez.edu.mx.services.module.rol.Rol;
 import utez.edu.mx.services.module.rol.RolRepository;
 import utez.edu.mx.services.module.usuario.Usuario;
@@ -26,17 +28,20 @@ public class EquipoService {
     private final EquipoUsuarioRepository equipoUsuarioRepository;
     private final UsuarioRepository usuarioRepository;
     private final RolRepository rolRepository;
+    private final ProyectoRepository proyectoRepository;
 
     public EquipoService(
             EquipoRepository equipoRepository,
             EquipoUsuarioRepository equipoUsuarioRepository,
             UsuarioRepository usuarioRepository,
-            RolRepository rolRepository
+            RolRepository rolRepository,
+            ProyectoRepository proyectoRepository
     ) {
         this.equipoRepository = equipoRepository;
         this.equipoUsuarioRepository = equipoUsuarioRepository;
         this.usuarioRepository = usuarioRepository;
         this.rolRepository = rolRepository;
+        this.proyectoRepository = proyectoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -135,11 +140,6 @@ public class EquipoService {
                     .body(new AppiResponse("Debes seleccionar al menos un integrante", HttpStatus.BAD_REQUEST));
         }
 
-        if (!dto.getIntegrantesIds().contains(dto.getIdLider())) {
-            return ResponseEntity.badRequest()
-                    .body(new AppiResponse("El líder debe formar parte de los integrantes seleccionados", HttpStatus.BAD_REQUEST));
-        }
-
         Set<Long> idsUnicos = new HashSet<>(dto.getIntegrantesIds());
         if (idsUnicos.size() != dto.getIntegrantesIds().size()) {
             return ResponseEntity.badRequest()
@@ -154,16 +154,56 @@ public class EquipoService {
                     .body(new AppiResponse("No se encontraron los roles necesarios en la base de datos", HttpStatus.INTERNAL_SERVER_ERROR));
         }
 
+        Optional<Usuario> liderOpt = usuarioRepository.findById(dto.getIdLider());
+        if (liderOpt.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(new AppiResponse("El líder seleccionado no existe", HttpStatus.BAD_REQUEST));
+        }
+
+        Optional<Proyecto> proyectoOpt = proyectoRepository.findById(dto.getIdProyecto());
+        if (proyectoOpt.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(new AppiResponse("El proyecto seleccionado no existe", HttpStatus.BAD_REQUEST));
+        }
+
+        Usuario lider = liderOpt.get();
+
+        if (equipoUsuarioRepository.existsByUsuarioIdUsuario(lider.getIdUsuario())) {
+            return ResponseEntity.badRequest()
+                    .body(new AppiResponse(
+                            "El líder " + lider.getUsername() + " ya pertenece a un equipo",
+                            HttpStatus.BAD_REQUEST
+                    ));
+        }
+
         Equipo equipo = new Equipo();
         equipo.setNombreEquipo(dto.getNombreEquipo());
-        equipo.setDescripcion(dto.getDescripcion());
         equipo.setLogo(dto.getLogo());
         equipo.setFechaCreacion(LocalDate.now());
         equipo.setEstatus("ACTIVO");
 
         Equipo equipoGuardado = equipoRepository.save(equipo);
 
+        // Relacionar el proyecto con el equipo guardado
+        Proyecto proyecto = proyectoOpt.get();
+        proyecto.setEquipo(equipoGuardado);
+        proyectoRepository.save(proyecto);
+
+        // Guardar líder en relación equipo-usuario
+        EquipoUsuario relacionLider = new EquipoUsuario();
+        relacionLider.setEquipo(equipoGuardado);
+        relacionLider.setUsuario(lider);
+        equipoUsuarioRepository.save(relacionLider);
+
+        lider.setRol(rolLiderOpt.get());
+        usuarioRepository.save(lider);
+
+        // Guardar integrantes
         for (Long idUsuario : dto.getIntegrantesIds()) {
+            if (idUsuario.equals(dto.getIdLider())) {
+                continue;
+            }
+
             Optional<Usuario> usuarioOpt = usuarioRepository.findById(idUsuario);
 
             if (usuarioOpt.isEmpty()) {
@@ -186,12 +226,7 @@ public class EquipoService {
             relacion.setUsuario(usuario);
             equipoUsuarioRepository.save(relacion);
 
-            if (usuario.getIdUsuario().equals(dto.getIdLider())) {
-                usuario.setRol(rolLiderOpt.get());
-            } else {
-                usuario.setRol(rolIntegranteOpt.get());
-            }
-
+            usuario.setRol(rolIntegranteOpt.get());
             usuarioRepository.save(usuario);
         }
 
@@ -234,5 +269,23 @@ public class EquipoService {
         equipoRepository.save(equipo);
 
         return ResponseEntity.ok(new AppiResponse("Equipo desactivado correctamente", HttpStatus.OK));
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<AppiResponse> findDisponiblesParaProyecto() {
+        List<Equipo> equiposDisponibles = equipoRepository.findAll()
+                .stream()
+                .filter(equipo -> "ACTIVO".equalsIgnoreCase(equipo.getEstatus()))
+                .filter(equipo ->
+                        !proyectoRepository.existsByEquipoIdEquipoAndEstadoNotIgnoreCase(
+                                equipo.getIdEquipo(),
+                                "CANCELADO"
+                        )
+                )
+                .toList();
+
+        return ResponseEntity.ok(
+                new AppiResponse("Equipos disponibles para proyecto obtenidos correctamente", equiposDisponibles, HttpStatus.OK)
+        );
     }
 }

@@ -1,4 +1,4 @@
-package utez.edu.mx.services.module.equipo.dto;
+package utez.edu.mx.services.module.equipo;
 
 import utez.edu.mx.services.module.equipo.Equipo;
 
